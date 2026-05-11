@@ -1,4 +1,4 @@
-from typing import Final, Sequence
+from typing import Final
 
 from prompt_toolkit.validation import Validator, ValidationError
 
