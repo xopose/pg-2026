@@ -30,12 +30,21 @@ class NonEmptyValidator(Validator):
 
 
 class YesNoValidator(Validator):
-    YES_VALUES: Final[Sequence[str]] = ("y", "yes", "д", "да")
-    NO_VALUES: Final[Sequence[str]] = ("n", "no", "н", "нет")
+    YES_VALUES: Final[frozenset[str]] = frozenset(["y", "yes", "д", "да"])
+    NO_VALUES: Final[frozenset[str]] = frozenset(["n", "no", "н", "нет"])
+    ALL_VALUES: Final[frozenset[str]] = YES_VALUES | NO_VALUES
+
+    @classmethod
+    def is_yes(cls, answer: str) -> bool:
+        return answer.lower() in cls.YES_VALUES
+
+    @classmethod
+    def is_no(cls, answer: str) -> bool:
+        return answer.lower() in cls.NO_VALUES
 
     def validate(self, document):
         text = document.text.lower()
-        if text not in self.YES_VALUES + self.NO_VALUES:
+        if text not in self.ALL_VALUES:
             raise ValidationError(message="Введите y/n (yes/no)")
 
 

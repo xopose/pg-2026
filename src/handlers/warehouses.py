@@ -167,7 +167,7 @@ def delete_warehouse(_id: str) -> None:
 
     answer = prompt("Вы уверены? (y/n, д/н): ", validator=YesNoValidator())
 
-    if answer in YesNoValidator.YES_VALUES:
+    if YesNoValidator.is_yes(answer):
         conn.execute("DELETE FROM catalog.warehouses WHERE id = %s", (_id,))
         if warehouse.label:
             console.print(
