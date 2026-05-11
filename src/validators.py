@@ -1,3 +1,5 @@
+from typing import Final, Sequence
+
 from prompt_toolkit.validation import Validator, ValidationError
 
 
@@ -28,9 +30,12 @@ class NonEmptyValidator(Validator):
 
 
 class YesNoValidator(Validator):
+    YES_VALUES: Final[Sequence[str]] = ("y", "yes", "д", "да")
+    NO_VALUES: Final[Sequence[str]] = ("n", "no", "н", "нет")
+
     def validate(self, document):
         text = document.text.lower()
-        if text not in ["y", "n", "yes", "no", "д", "н", "да", "нет"]:
+        if text not in self.YES_VALUES + self.NO_VALUES:
             raise ValidationError(message="Введите y/n (yes/no)")
 
 
