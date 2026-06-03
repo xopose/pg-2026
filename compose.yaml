@@ -4,11 +4,14 @@ services:
     container_name: db
     restart: always
     # set shared memory limit since it is needed for postgres
-    shm_size: 128mb
+    shm_size: 256mb
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - ./postgresql_data:/var/lib/postgresql
+#      - ./init.sql:/docker-entrypoint0initdb.d/init.sql
     environment:
-      POSTGRES_PASSWORD: example
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: inventorydb
+      POSTGRES_USER: app_user
 

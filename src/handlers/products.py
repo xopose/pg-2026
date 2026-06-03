@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from commands import command, CATEGORY_PRODUCTS
-
+from rich.panel import Panel
+from rich.table import Table
+from console import console, render_error
 
 @dataclass
 class Product:
@@ -10,14 +12,29 @@ class Product:
     sku: str
     name: str
     price: Decimal
-    category: str
+    category_id: int
 
 
 def _render_product(product: Product):  # pylint: disable=unused-argument
-    """
-    Отображает информацию о продукте в виде таблицы внутри панели.
-    Используйте rich.table.Table и rich.panel.Panel для форматирования.
-    """
+    table = Table(show_header=False, box=None, padding=(0, 2))
+
+    table.add_column("Поле", style="bold cyan", width=15)
+    table.add_column("Значение", style="white")
+
+    table.add_row("ID", str(product.id))
+    table.add_row("stock keeping unit", product.sku)
+    table.add_row("имя товара", product.name)
+    table.add_row("цена", product.price or "")
+    table.add_row("Id категории", str(product.category_id))
+
+    panel = Panel(
+        table,
+        expand=False,
+        title=f"[bold green]Склад #{product.id}[/bold green]",
+        border_style="green",
+    )
+
+    console.print(panel)
 
 
 @command("list products", "список всех товаров", CATEGORY_PRODUCTS)

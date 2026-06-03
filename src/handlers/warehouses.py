@@ -8,6 +8,7 @@ from rich.table import Table
 
 from console import console, render_error
 from db import get_conn
+from sqlalchemy import false
 from validators import ChoiceValidator, NonEmptyValidator, YesNoValidator
 from commands import command, CATEGORY_WAREHOUSES
 
@@ -41,6 +42,7 @@ class Warehouse:
     city: str
     address: str
     label: str | None
+    is_central: bool
 
 
 def _render_warehouse(warehouse: Warehouse) -> None:
@@ -53,6 +55,7 @@ def _render_warehouse(warehouse: Warehouse) -> None:
     table.add_row("Город", warehouse.city)
     table.add_row("Адрес", warehouse.address)
     table.add_row("Метка", warehouse.label or "")
+    table.add_row("Центральный", str(warehouse.is_central))
 
     panel = Panel(
         table,
@@ -73,6 +76,7 @@ def list_warehouses() -> None:
     table.add_column("Город", style="green", min_width=20)
     table.add_column("Адрес", style="yellow", min_width=30)
     table.add_column("Метка", style="magenta", min_width=15)
+    table.add_column("Центральный", style="yellow", min_width=15)
 
     with conn.cursor(row_factory=class_row(Warehouse)) as cur:
         cur.execute("SELECT * FROM catalog.warehouses")
@@ -84,6 +88,7 @@ def list_warehouses() -> None:
             warehouse.city,
             warehouse.address,
             warehouse.label or "",
+            str(warehouse.is_central)
         )
     console.print(table)
 
@@ -105,12 +110,18 @@ def show_warehouse(_id: str) -> None:
 @command("add warehouse", "добавить склад (интерактивно)", CATEGORY_WAREHOUSES)
 def add_warehouse() -> None:
     conn = get_conn()
+
     city = prompt("Город: ", validator=city_validator, completer=city_completer).strip()
     address = prompt("Адрес: ", validator=NonEmptyValidator()).strip()
     label = prompt("Метка (необязательно): ").strip() or None
+    isCentral = prompt("Сделать центральным: ", validator=YesNoValidator()).strip()
+    isCentral = (isCentral in ['y', 'д']) if True else False
+    if isCentral:
+        conn.execute("UPDATE catalog.warehouses SET is_central = false where id > 0")
+
     conn.execute(
-        "INSERT INTO catalog.warehouses (city, address, label) VALUES (%s, %s, %s)",
-        (city, address, label),
+        "INSERT INTO catalog.warehouses (city, address, label, is_central) VALUES (%s, %s, %s, %s)",
+        (city, address, label, isCentral),
     )
     if label:
         console.print(f"[green]Склад в городе {city} ({label}) добавлен [/green]")
